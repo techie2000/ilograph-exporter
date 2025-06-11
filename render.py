@@ -1,6 +1,7 @@
 import yaml
 import json
 import base64
+import os
 
 
 def normalize_resources(resources):
@@ -80,7 +81,7 @@ def inline_all_images(d: dict):
             inline_all_images(d['children'])
 
 
-def render(d, imgs):
+def render(d, imgs, output_filename):
     with open('template.html', 'r') as f:
         template = str(f.read())
 
@@ -94,17 +95,23 @@ def render(d, imgs):
             f.write(json.dumps(d, indent=4))
         with open('debug-icon.json', 'w') as f:
             f.write(json.dumps(imgs, indent=4))
-        with open('out.html', 'w') as f:
+        with open(output_filename, 'w') as f:
             f.write(template)
 
 
 def main():
     with open('simple.yaml', 'r') as file:
         d = yaml.safe_load(file)
+        
     normalize_resources(d['resources'])
     normalize_perspectives(d['perspectives'])
     inline_all_images(d['resources'])
-    render(d, imgs)
+    
+    
+    base_name = os.path.splitext(os.path.basename(yaml_file))[0]
+    output_file = f"{base_name}.html"
+    render(d, imgs, output_file)
+
 
 
 if __name__ == "__main__":
